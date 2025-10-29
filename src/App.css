@@ -1,0 +1,51 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1438 50%, #2d1b4e 100%);
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+/* CSS Variables for Design System */
+:root {
+  --primary-cyan: #00D9FF;
+  --primary-magenta: #FF006E;
+  --primary-purple: #8B5CF6;
+  --dark-navy: #0a0e27;
+  --dark-purple: #1a1438;
+  --card-bg: rgba(30, 27, 75, 0.6);
+  --card-border: rgba(139, 92, 246, 0.3);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b8;
+  --gradient-primary: linear-gradient(135deg, #00D9FF 0%, #8B5CF6 100%);
+  --gradient-secondary: linear-gradient(135deg, #FF006E 0%, #8B5CF6 100%);
+  --shadow-glow: 0 0 30px rgba(0, 217, 255, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-navy);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-cyan);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00b8d9;
+}

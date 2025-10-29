@@ -1,0 +1,229 @@
+.dsa-page {
+  min-height: calc(100vh - 80px);
+  padding: 3rem 2rem;
+}
+
+.dsa-header {
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+}
+
+.dsa-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.dsa-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.dsa-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.topic-section {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+
+.topic-section:hover {
+  border-color: var(--primary-cyan);
+}
+
+.topic-header {
+  padding: 2rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.topic-header:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.topic-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.topic-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.expand-icon {
+  font-size: 1.5rem;
+  color: var(--primary-cyan);
+  transition: var(--transition);
+}
+
+.problems-list {
+  padding: 0 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.problem-card {
+  background: rgba(10, 14, 39, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.problem-card:hover {
+  border-color: var(--primary-cyan);
+  box-shadow: 0 5px 20px rgba(0, 217, 255, 0.2);
+}
+
+.problem-header {
+  padding: 1.5rem;
+  cursor: pointer;
+}
+
+.problem-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.problem-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.problem-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.difficulty-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.difficulty-easy {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.difficulty-medium {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
+.difficulty-hard {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.company-badge {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--primary-cyan);
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 217, 255, 0.3);
+}
+
+.problem-details {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.code-example {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border-left: 3px solid var(--primary-cyan);
+}
+
+.code-label {
+  color: #22c55e;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: 'Monaco', monospace;
+}
+
+.code-value {
+  color: var(--text-primary);
+  font-family: 'Monaco', monospace;
+  font-size: 0.95rem;
+}
+
+.problem-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.action-button {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.solve-button {
+  background: var(--gradient-primary);
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.solve-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+}
+
+.discuss-button {
+  background: transparent;
+  border: 1px solid var(--primary-cyan);
+  color: var(--primary-cyan);
+}
+
+.discuss-button:hover {
+  background: rgba(0, 217, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .dsa-title {
+    font-size: 2rem;
+  }
+  
+  .topic-title {
+    font-size: 1.4rem;
+  }
+  
+  .problem-actions {
+    flex-direction: column;
+  }
+}

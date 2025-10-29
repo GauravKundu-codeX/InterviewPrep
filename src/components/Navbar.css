@@ -1,0 +1,159 @@
+/* Navbar.css - Enhanced Auth Buttons */
+
+/* --- Existing Styles (Keep these) --- */
+:root {
+  /* Define your color variables if they aren't global */
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0c0;
+  --primary-cyan: #00d9ff; /* Example */
+  --gradient-primary: linear-gradient(90deg, #00d9ff, #0a58ca); /* Example Gradient */
+  --transition: all 0.3s ease;
+}
+
+.navbar {
+  background: rgba(10, 14, 39, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif; /* Added consistent font */
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.logo-icon {
+  font-size: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.navbar-logo:hover {
+  color: var(--primary-cyan);
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+}
+
+.navbar-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: var(--transition);
+  position: relative;
+  padding-bottom: 5px; /* Add padding for underline */
+}
+
+.navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; /* Position underline correctly */
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transition: width 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: var(--primary-cyan);
+}
+
+.navbar-link:hover::after {
+  width: 100%;
+}
+
+.navbar-auth {
+  display: flex;
+  gap: 1rem;
+}
+
+/* --- NEW Button Styles --- */
+
+/* Base style for all auth buttons */
+.navbar-auth button,
+.navbar-auth a { /* If you use Links styled as buttons */
+  padding: 0.7rem 1.6rem; /* Slightly larger padding */
+  border-radius: 20px; /* More rounded */
+  font-size: 0.9rem; /* Adjusted font size */
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition), transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  text-decoration: none; /* For Links */
+  display: inline-block; /* For Links */
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+.navbar-auth button:hover,
+.navbar-auth a:hover {
+  transform: translateY(-2px) scale(1.03); /* Lift effect */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Sign In Button (Ghost style) */
+.btn-signin {
+  background: transparent;
+  border: 1.5px solid var(--primary-cyan); /* Slightly thicker border */
+  color: var(--primary-cyan);
+}
+
+.btn-signin:hover {
+  background: rgba(0, 217, 255, 0.1); /* Subtle background on hover */
+  border-color: #33eaff; /* Brighter border on hover */
+}
+
+/* Sign Up Button (Gradient style) */
+.btn-signup {
+  background: var(--gradient-primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+}
+
+.btn-signup:hover {
+  background: linear-gradient(90deg, #0abde3, #0a58ca); /* Slightly darker gradient */
+  box-shadow: 0 6px 20px rgba(0, 217, 255, 0.4);
+}
+
+/* Sign Out Button (Subtle style) */
+.btn-signout {
+  background: rgba(255, 255, 255, 0.1); /* Subtle background */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #d0d0d0; /* Slightly dimmer text */
+}
+
+.btn-signout:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff; /* Brighter text on hover */
+  border-color: rgba(255, 255, 255, 0.3);
+}
