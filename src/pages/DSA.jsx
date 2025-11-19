@@ -1,41 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './DSA.css';
 // --- Firebase Imports ---
 import { db } from '../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const DSA = () => {
-  const navigate = useNavigate();
-  // --- Updated state to hold string IDs, not number indexes ---
   const [expandedSection, setExpandedSection] = useState(null);
   const [expandedProblem, setExpandedProblem] = useState(null);
-
-  // --- State for data and loading ---
   const [dsaTopics, setDsaTopics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // --- Data Fetching Effect ---
   useEffect(() => {
     const fetchTopicsAndProblems = async () => {
       setLoading(true);
       try {
-        // 1. Fetch all topics
         const topicsQuery = query(collection(db, 'dsaTopics'), orderBy('order'));
         const topicsSnapshot = await getDocs(topicsQuery);
         
-        // 2. Create an array of promises for each topic's problems
         const topicsWithProblems = topicsSnapshot.docs.map(async (topicDoc) => {
           const topicData = topicDoc.data();
-          
-          // 3. Fetch the 'problems' subcollection for this topic
           const problemsQuery = query(collection(db, 'dsaTopics', topicDoc.id, 'problems'));
           const problemsSnapshot = await getDocs(problemsQuery);
           
           const problemsData = problemsSnapshot.docs.map(problemDoc => ({
             ...problemDoc.data(),
             id: problemDoc.id,
-            // Map 'tags' from DB to 'companies' to match your JSX
             companies: problemDoc.data().tags || [], 
           }));
 
@@ -46,10 +36,8 @@ const DSA = () => {
           };
         });
 
-        // 4. Wait for all fetches to complete
         const allData = await Promise.all(topicsWithProblems);
         setDsaTopics(allData);
-
       } catch (err) {
         console.error("Error fetching DSA data: ", err);
       }
@@ -57,12 +45,13 @@ const DSA = () => {
     };
 
     fetchTopicsAndProblems();
-  }, []); // Runs once on component load
+  }, []);
 
-  // --- Updated toggle functions to use IDs ---
   const toggleSection = (topicId) => {
     setExpandedSection(expandedSection === topicId ? null : topicId);
-    setExpandedProblem(null); // Close any open problem
+    setExpandedProblem(null);
+    const index = dsaTopics.findIndex(t => t.id === topicId);
+    if (index !== -1) setCurrentIndex(index);
   };
 
   const toggleProblem = (problemId) => {
@@ -78,52 +67,65 @@ const DSA = () => {
     }
   };
 
-  // --- Loading State ---
+  const totalTopics = dsaTopics.length;
+  const progressPercentage = totalTopics > 0 ? (currentIndex + 1) / totalTopics * 100 : 0;
+
   if (loading) {
     return (
       <div className="dsa-page">
-        <h1 style={{ textAlign: 'center' }}>Loading DSA Problems...</h1>
+        <h1 style={{ textAlign: 'center', marginTop: '4rem' }}>Loading DSA Problems...</h1>
       </div>
     );
   }
 
   return (
     <div className="dsa-page">
+      <div className="progress-bar-container">
+        <div className="progress-bar" style={{ width: `${progressPercentage}%` }}></div>
+      </div>
+
       <div className="dsa-header">
-        <button className="back-button" onClick={() => navigate('/')}>
-          ← Back to Home
-        </button>
-        <h1 className="dsa-title">Practice DSA Problems</h1>
-        <p className="dsa-subtitle">Master data structures and algorithms with topic-wise problems from top companies</p>
+        <div className="header-content">
+          <h1 className="dsa-title">Master DSA Concepts</h1>
+          <p className="dsa-subtitle">Master data structures and algorithms with curated problems from top companies</p>
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-number">{dsaTopics.length}</span>
+              <span className="stat-label">Topics</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{dsaTopics.reduce((sum, topic) => sum + (topic.problems?.length || 0), 0)}</span>
+              <span className="stat-label">Problems</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="dsa-container">
-        {/* --- Render dynamic topics --- */}
-        {dsaTopics.map((topic) => (
+        {dsaTopics.map((topic, index) => (
           <div key={topic.id} className="topic-section">
             <div 
-              className="topic-header"
-              // --- Use topic.id ---
+              className={`topic-header ${expandedSection === topic.id ? 'active' : ''}`}
               onClick={() => toggleSection(topic.id)}
             >
-              <div>
-                <h2 className="topic-title">{topic.name}</h2> {/* Use 'name' from DB */}
+              <div className="topic-icon">
+                <span className="topic-number">{index + 1}</span>
+              </div>
+              <div className="topic-info">
+                <h2 className="topic-title">{topic.name}</h2>
                 <p className="topic-description">{topic.description}</p>
               </div>
-              <div className="expand-icon">
-                {/* --- Use topic.id --- */}
-                {expandedSection === topic.id ? '▲' : '▼'}
+              <div className={`expand-icon ${expandedSection === topic.id ? 'rotated' : ''}`}>
+                ▼
               </div>
             </div>
 
-            {/* --- Use topic.id --- */}
             {expandedSection === topic.id && (
               <div className="problems-list">
-                {topic.problems.map((problem) => (
-                  <div key={problem.id} className="problem-card">
+                {topic.problems.map((problem, problemIndex) => (
+                  <div key={problem.id} className="problem-card" style={{ animationDelay: `${problemIndex * 0.05}s` }}>
                     <div 
-                      className="problem-header"
-                      // --- Use problem.id ---
+                      className={`problem-header ${expandedProblem === problem.id ? 'active' : ''}`}
                       onClick={() => toggleProblem(problem.id)}
                     >
                       <div className="problem-main">
@@ -133,7 +135,6 @@ const DSA = () => {
                           <span className={`difficulty-badge ${getDifficultyClass(problem.difficulty)}`}>
                             {problem.difficulty}
                           </span>
-                          {/* 'companies' is mapped from 'tags' in our fetch logic */}
                           {problem.companies.map((company, idx) => (
                             <span key={idx} className="company-badge">{company}</span>
                           ))}
@@ -141,10 +142,8 @@ const DSA = () => {
                       </div>
                     </div>
 
-                    {/* --- Use problem.id --- */}
                     {expandedProblem === problem.id && (
                       <div className="problem-details">
-                        {/* Only show input/output if they exist in the DB */}
                         {problem.input && (
                           <div className="code-example">
                             <div className="code-label">Input:</div>
@@ -162,7 +161,7 @@ const DSA = () => {
                             ✏️ Solve Problem
                           </button>
                           <button className="action-button discuss-button">
-                            Discuss
+                            💬 Discuss
                           </button>
                         </div>
                       </div>

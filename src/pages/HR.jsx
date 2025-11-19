@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HR.css';
-// --- Firebase Imports ---
-import { db, storage, auth } from '../firebase'; // Added storage and auth
+import { db, storage, auth } from '../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Storage functions
-import { onAuthStateChanged } from 'firebase/auth'; // To get user ID
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const HR = () => {
   const navigate = useNavigate();
@@ -13,25 +12,33 @@ const HR = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null); // Added state for user
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [animatedProgress, setAnimatedProgress] = useState(0);
 
   // --- Recording State ---
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingStatus, setRecordingStatus] = useState('Idle'); // Idle, Recording, Processing, Done, Error
+  const [recordingStatus, setRecordingStatus] = useState('Idle');
   const [audioBlob, setAudioBlob] = useState(null);
-  const [feedback, setFeedback] = useState(''); // State for AI feedback (later)
+  const [feedback, setFeedback] = useState('');
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // --- Get current user ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
-    return () => unsubscribe(); // Cleanup listener
+    return () => unsubscribe();
   }, []);
 
-  // --- Fetch questions from Firestore ---
+  useEffect(() => {
+    if (questions.length > 0 && selectedQuestionId) {
+      const currentIndex = questions.findIndex(q => q.id === selectedQuestionId);
+      const progress = ((currentIndex + 1) / questions.length) * 100;
+      setAnimatedProgress(progress);
+    }
+  }, [selectedQuestionId, questions]);
+
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
@@ -56,12 +63,11 @@ const HR = () => {
     };
 
     fetchQuestions();
-  }, [selectedQuestionId]); // Rerun if selectedQuestionId is null initially
+  }, [selectedQuestionId]);
 
   const handleQuestionSelect = (id) => {
     setSelectedQuestionId(id);
     setShowAnswer(false);
-    // Reset recording state when question changes
     setIsRecording(false);
     setRecordingStatus('Idle');
     setAudioBlob(null);
@@ -72,6 +78,7 @@ const HR = () => {
   };
 
   const currentQuestion = questions.find(q => q.id === selectedQuestionId);
+  const currentIndex = questions.findIndex(q => q.id === selectedQuestionId);
 
   // --- Start Recording ---
   const startRecording = async () => {
@@ -87,7 +94,7 @@ const HR = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = []; // Reset chunks
+      audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -96,12 +103,10 @@ const HR = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' }); // Use webm or another suitable format
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setRecordingStatus('Processing');
-        console.log("Recording stopped, audio blob created:", blob);
 
-        // --- Upload to Firebase Storage ---
         if (!currentUser || !currentQuestion) return;
 
         const userId = currentUser.uid;
@@ -111,35 +116,22 @@ const HR = () => {
         const storageRef = ref(storage, fileName);
 
         try {
-          console.log("Uploading to:", fileName);
-          const snapshot = await uploadBytes(storageRef, blob);
-          console.log('Uploaded a blob or file!', snapshot);
-          // Optional: Get download URL if you want to store it in Firestore
-          // const downloadURL = await getDownloadURL(snapshot.ref);
-          // console.log('File available at', downloadURL);
-
-          setRecordingStatus('Done'); // Mark as done after successful upload
-
-          // --- Placeholder for AI analysis call ---
+          await uploadBytes(storageRef, blob);
+          setRecordingStatus('Done');
           setFeedback('Recording uploaded successfully! AI feedback coming soon...');
-
-
         } catch (uploadError) {
           console.error("Error uploading audio:", uploadError);
           setRecordingStatus('Error');
           setFeedback(`Upload failed: ${uploadError.message}`);
         }
 
-        // Stop the media stream tracks
         stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
       setRecordingStatus('Recording');
-      setFeedback(''); // Clear previous feedback
-      console.log("Recording started...");
-
+      setFeedback('');
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone. Please check permissions.");
@@ -152,11 +144,9 @@ const HR = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      // Status will be set to 'Processing' in the onstop handler
     }
   };
 
-  // --- Handle Record Button Click ---
   const handleRecordClick = () => {
     if (isRecording) {
       stopRecording();
@@ -165,12 +155,13 @@ const HR = () => {
     }
   };
 
-
-  // --- Loading State ---
   if (loading) {
     return (
       <div className="hr-page">
-        <h1 style={{ textAlign: 'center' }}>Loading HR Questions...</h1>
+        <div className="loading-spinner">
+          <div className="spinner-circle"></div>
+          <p>Loading HR Questions...</p>
+        </div>
       </div>
     );
   }
@@ -178,34 +169,44 @@ const HR = () => {
   if (!currentQuestion) {
     return (
       <div className="hr-page">
-        <h1 style={{ textAlign: 'center' }}>No HR Questions Found.</h1>
-        <p style={{ textAlign: 'center' }}>Go to your Firebase Console to add documents to the 'hrQuestions' collection.</p>
+        <div className="no-data-container">
+          <p>No HR Questions Found.</p>
+          <p style={{ fontSize: '0.95rem' }}>Go to your Firebase Console to add documents to the 'hrQuestions' collection.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="hr-page">
+      <div className="progress-bar-container">
+        <div className="progress-bar" style={{ width: `${animatedProgress}%` }}></div>
+      </div>
+
       <div className="hr-header">
-        <button className="back-button" onClick={() => navigate('/')}>
-          ← Back to Home
-        </button>
-        <h1 className="hr-title">Practice HR Questions</h1>
-        <p className="hr-subtitle">Prepare for behavioral and HR interview questions</p>
+        <h1 className="hr-title">Master HR Interviews</h1>
+        <p className="hr-subtitle">Practice behavioral and HR questions with AI-powered feedback</p>
+        <div className="progress-counter">Question {currentIndex + 1} of {questions.length}</div>
       </div>
 
       <div className="hr-container">
         <div className="questions-sidebar">
-          <h3 className="sidebar-title">Questions</h3>
+          <h3 className="sidebar-title">
+            <span className="sidebar-icon">📋</span> Questions
+          </h3>
           <div className="questions-list">
-            {questions.map((q) => (
+            {questions.map((q, idx) => (
               <div
                 key={q.id}
                 className={`question-item ${selectedQuestionId === q.id ? 'active' : ''}`}
                 onClick={() => handleQuestionSelect(q.id)}
+                style={{ animationDelay: `${idx * 0.05}s` }}
               >
-                <div className="question-text">{q.question}</div>
-                <div className="question-category">{q.category}</div>
+                <div className="question-number">{idx + 1}</div>
+                <div className="question-content">
+                  <div className="question-text">{q.question}</div>
+                  <div className="question-category">{q.category}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -213,60 +214,64 @@ const HR = () => {
 
         <div className="question-detail">
           <div className="detail-card">
-            <div className="question-icon">💬</div>
-            <h2 className="detail-question">{currentQuestion.question}</h2>
-            <span className="detail-category">{currentQuestion.category}</span>
+            <div className="question-header">
+              <div className="question-icon">💬</div>
+              <div>
+                <h2 className="detail-question">{currentQuestion.question}</h2>
+                <span className="detail-category-badge">{currentQuestion.category}</span>
+              </div>
+            </div>
 
             <button
-              className="show-answer-button"
+              className={`show-answer-button ${showAnswer ? 'active' : ''}`}
               onClick={() => setShowAnswer(!showAnswer)}
             >
-              {showAnswer ? 'Hide Answer' : 'Show Answer'}
+              <span className="button-icon">{showAnswer ? '▼' : '▶'}</span>
+              {showAnswer ? 'Hide Tips & Answer' : 'Show Tips & Answer'}
             </button>
 
             {showAnswer && (
-              <div className="answer-section">
+              <div className="answer-section animate-in">
                 <div className="answer-content">
-                  <h4>Tips for Success</h4>
+                  <h4 className="answer-title">💡 Tips for Success</h4>
                   <ul className="tips-list">
                     {currentQuestion.tips.map((tip, idx) => (
-                      <li key={idx} className="tip-item">
-                        <span className="tip-icon">✓</span>
-                        {tip}
+                      <li key={idx} className="tip-item" style={{ animationDelay: `${idx * 0.1}s` }}>
+                        <span className="tip-number">{idx + 1}</span>
+                        <span className="tip-text">{tip}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="answer-text">
-                  <h4>Sample Approach</h4>
+                  <h4 className="answer-title">📝 Sample Approach</h4>
                   <p>{currentQuestion.sampleAnswer}</p>
                 </div>
               </div>
             )}
 
-            {/* --- Recording UI --- */}
             <div className="recording-section">
+              <h3 className="recording-title">🎤 Practice Your Answer</h3>
               <button
-                className={`practice-button record-button ${isRecording ? 'recording' : ''}`}
+                className={`practice-button record-button ${isRecording ? 'recording' : ''} ${recordingStatus === 'Done' ? 'success' : ''}`}
                 onClick={handleRecordClick}
-                disabled={recordingStatus === 'Processing'} // Disable while uploading/analyzing
+                disabled={recordingStatus === 'Processing'}
               >
-                🎤 {isRecording ? 'Stop Recording' : (audioBlob ? 'Record Again' : 'Record Answer')}
+                <span className="button-pulse"></span>
+                {isRecording ? '⏹ Stop Recording' : (audioBlob ? '🔄 Record Again' : '🎤 Start Recording')}
               </button>
-              <p className="recording-status">
-                Status: {recordingStatus}
-                {isRecording && <span className="recording-indicator"> (● Recording...)</span>}
-                {recordingStatus === 'Processing' && <span> (Uploading...)</span>}
+              <p className={`recording-status ${recordingStatus.toLowerCase()}`}>
+                <span className="status-indicator"></span>
+                {recordingStatus}
+                {isRecording && <span className="recording-dot"> ●</span>}
               </p>
               {feedback && (
-                <div className="feedback-section">
-                  <h4>Feedback:</h4>
+                <div className={`feedback-section ${recordingStatus === 'Done' ? 'success' : 'error'}`}>
+                  <h4>📊 Feedback:</h4>
                   <p>{feedback}</p>
                 </div>
               )}
             </div>
-
-            {/* Removed the 'Practice Speaking' button div */}
           </div>
         </div>
       </div>
@@ -275,5 +280,3 @@ const HR = () => {
 };
 
 export default HR;
-
-

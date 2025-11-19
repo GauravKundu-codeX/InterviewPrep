@@ -9,45 +9,45 @@ const Resources = () => {
   const topics = [
     {
       title: 'Data Structures',
-      icon: '🏛️',
+      icon: '📊',
       description: 'Arrays, Linked Lists, Trees, Graphs, Hash Tables',
       color: '#00D9FF'
     },
     {
       title: 'Algorithms',
-      icon: '🧩',
+      icon: '⚡',
       description: 'Sorting, Searching, Dynamic Programming, Greedy',
-      color: '#8B5CF6'
+      color: '#00D9FF'
     },
     {
       title: 'Object-Oriented Programming',
-      icon: '📦',
+      icon: '🏗️',
       description: 'OOP Concepts, Design Patterns, SOLID Principles',
-      color: '#FF006E'
+      color: '#00D9FF'
     },
     {
       title: 'Database Management System',
-      icon: '💾',
+      icon: '🗄️',
       description: 'SQL, NoSQL, Normalization, Indexing, Transactions',
-      color: '#22c55e'
+      color: '#00D9FF'
     },
     {
       title: 'Operating Systems',
-      icon: '💻',
+      icon: '⚙️',
       description: 'Process Management, Memory, File Systems, Scheduling',
-      color: '#fbbf24'
+      color: '#00D9FF'
     },
     {
       title: 'Computer Networks',
       icon: '🌐',
       description: 'TCP/IP, HTTP, DNS, Routing, Network Security',
-      color: '#06b6d4'
+      color: '#00D9FF'
     },
     {
       title: 'System Design',
       icon: '🏛️',
       description: 'Scalability, Load Balancing, Caching, Microservices',
-      color: '#a855f7'
+      color: '#00D9FF'
     }
   ];
 
@@ -68,24 +68,26 @@ const Resources = () => {
 
   return (
     <div className="resources-page">
+      <div className="resources-left-border"></div>
+      
       <div className="resources-header">
-        <button className="back-button" onClick={() => navigate('/')}>
-          ← Back to Home
-        </button>
-        <h1 className="resources-title">Core CS Resources</h1>
-        <p className="resources-subtitle">Upload and access study materials for core computer science topics</p>
+        <h1 className="resources-title">Study Resources</h1>
+        <p className="resources-subtitle">Curated study materials for core computer science topics</p>
       </div>
 
       <div className="resources-container">
         <div className="topics-grid">
           {topics.map((topic, index) => (
             <div key={index} className="resource-card">
+              <div className="card-number">{String(index + 1).padStart(2, '0')}</div>
+              
               <div className="resource-header">
-                <div className="resource-icon" style={{ color: topic.color }}>
+                <div className="resource-icon">
                   {topic.icon}
                 </div>
-                <h3 className="resource-title">{topic.title}</h3>
               </div>
+
+              <h3 className="resource-title">{topic.title}</h3>
               <p className="resource-description">{topic.description}</p>
 
               <div className="upload-section">
@@ -98,21 +100,22 @@ const Resources = () => {
                     className="file-input"
                   />
                   <span className="upload-button">
-                    📄 Upload PDFs
+                    + Upload Files
                   </span>
                 </label>
 
                 {uploadedFiles[topic.title] && uploadedFiles[topic.title].length > 0 && (
                   <div className="uploaded-files">
-                    <div className="files-label">Uploaded Files:</div>
+                    <div className="files-count">{uploadedFiles[topic.title].length} file(s)</div>
                     {uploadedFiles[topic.title].map((file, fileIndex) => (
                       <div key={fileIndex} className="file-item">
-                        <span className="file-name">📄 {file.name}</span>
+                        <span className="file-name">{file.name}</span>
                         <button
                           className="remove-button"
                           onClick={() => handleRemoveFile(topic.title, fileIndex)}
+                          aria-label="Remove file"
                         >
-                          ×
+                          ✕
                         </button>
                       </div>
                     ))}
@@ -120,8 +123,8 @@ const Resources = () => {
                 )}
               </div>
 
-              <button className="view-resources-button" style={{ borderColor: topic.color, color: topic.color }}>
-                View Resources
+              <button className="view-resources-button">
+                View Resources →
               </button>
             </div>
           ))}
