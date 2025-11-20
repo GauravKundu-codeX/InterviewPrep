@@ -1,137 +1,115 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import './Resources.css';
+// --- Firebase Imports ---
+import { db } from '../firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const Resources = () => {
-  const navigate = useNavigate();
-  const [uploadedFiles, setUploadedFiles] = useState({});
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const topics = [
-    {
-      title: 'Data Structures',
-      icon: '📊',
-      description: 'Arrays, Linked Lists, Trees, Graphs, Hash Tables',
-      color: '#00D9FF'
-    },
-    {
-      title: 'Algorithms',
-      icon: '⚡',
-      description: 'Sorting, Searching, Dynamic Programming, Greedy',
-      color: '#00D9FF'
-    },
-    {
-      title: 'Object-Oriented Programming',
-      icon: '🏗️',
-      description: 'OOP Concepts, Design Patterns, SOLID Principles',
-      color: '#00D9FF'
-    },
-    {
-      title: 'Database Management System',
-      icon: '🗄️',
-      description: 'SQL, NoSQL, Normalization, Indexing, Transactions',
-      color: '#00D9FF'
-    },
-    {
-      title: 'Operating Systems',
-      icon: '⚙️',
-      description: 'Process Management, Memory, File Systems, Scheduling',
-      color: '#00D9FF'
-    },
-    {
-      title: 'Computer Networks',
-      icon: '🌐',
-      description: 'TCP/IP, HTTP, DNS, Routing, Network Security',
-      color: '#00D9FF'
-    },
-    {
-      title: 'System Design',
-      icon: '🏛️',
-      description: 'Scalability, Load Balancing, Caching, Microservices',
-      color: '#00D9FF'
-    }
-  ];
+  // Fetch resources directly from Firestore Client SDK
+  const fetchResources = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // 1. Fetch all primary category documents
+      const categoriesQuery = query(collection(db, 'categories'), orderBy('order'));
+      const categoriesSnapshot = await getDocs(categoriesQuery);
+      
+      // 2. Map over categories and fetch their nested resources
+      const categoriesWithFiles = categoriesSnapshot.docs.map(async (categoryDoc) => {
+        const categoryData = categoryDoc.data();
+        
+        // --- FIX: Changed 'files' to 'resources' ---
+        const filesQuery = query(collection(db, 'categories', categoryDoc.id, 'resources'), orderBy('title', 'asc'));
+        const filesSnapshot = await getDocs(filesQuery);
+        
+        const filesData = filesSnapshot.docs.map(fileDoc => ({
+          id: fileDoc.id,
+          ...fileDoc.data(),
+        }));
 
-  const handleFileUpload = (topicTitle, event) => {
-    const files = Array.from(event.target.files);
-    setUploadedFiles(prev => ({
-      ...prev,
-      [topicTitle]: [...(prev[topicTitle] || []), ...files]
-    }));
-  };
+        return {
+          ...categoryData,
+          id: categoryDoc.id,
+          files: filesData, // Note: State variable is still called 'files' internally
+        };
+      });
 
-  const handleRemoveFile = (topicTitle, fileIndex) => {
-    setUploadedFiles(prev => ({
-      ...prev,
-      [topicTitle]: prev[topicTitle].filter((_, index) => index !== fileIndex)
-    }));
-  };
+      // 3. Wait for all nested fetches to complete
+      const allData = await Promise.all(categoriesWithFiles);
+      setResources(allData); 
 
-  return (
-    <div className="resources-page">
-      <div className="resources-left-border"></div>
-      
-      <div className="resources-header">
-        <h1 className="resources-title">Study Resources</h1>
-        <p className="resources-subtitle">Curated study materials for core computer science topics</p>
-      </div>
+    } catch (err) {
+      console.error('Error fetching resources:', err);
+      setError(`Could not load resources. Please ensure Firestore rules allow public read for /categories/{id}/resources.`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div className="resources-container">
-        <div className="topics-grid">
-          {topics.map((topic, index) => (
-            <div key={index} className="resource-card">
-              <div className="card-number">{String(index + 1).padStart(2, '0')}</div>
-              
-              <div className="resource-header">
-                <div className="resource-icon">
-                  {topic.icon}
-                </div>
-              </div>
+  useEffect(() => {
+    fetchResources();
+  }, []);
 
-              <h3 className="resource-title">{topic.title}</h3>
-              <p className="resource-description">{topic.description}</p>
 
-              <div className="upload-section">
-                <label className="upload-label">
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,.ppt,.pptx"
-                    onChange={(e) => handleFileUpload(topic.title, e)}
-                    className="file-input"
-                  />
-                  <span className="upload-button">
-                    + Upload Files
-                  </span>
-                </label>
+  return (
+    <div className="resources-page">
+      <div className="resources-header">
+        <h1>Study Resources</h1>
+        <p>Curated study materials for core computer science topics</p>
+      </div>
 
-                {uploadedFiles[topic.title] && uploadedFiles[topic.title].length > 0 && (
-                  <div className="uploaded-files">
-                    <div className="files-count">{uploadedFiles[topic.title].length} file(s)</div>
-                    {uploadedFiles[topic.title].map((file, fileIndex) => (
-                      <div key={fileIndex} className="file-item">
-                        <span className="file-name">{file.name}</span>
-                        <button
-                          className="remove-button"
-                          onClick={() => handleRemoveFile(topic.title, fileIndex)}
-                          aria-label="Remove file"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+      {loading && <p className="loading-message">Loading resources...</p>}
+      {error && <p className="error-message">{error}</p>}
+      
+      <div className="resources-grid">
+        {resources.map((category, index) => {
+          const filesCount = category.files?.length || 0;
+          
+          return (
+            <div key={category.id} className="resource-card">
+              <div className="card-bg-number">{String(index + 1).padStart(2, '0')}</div>
+              <div className="card-icon">{category.icon}</div>
+              <h3>{category.title}</h3> 
+              <p className="card-desc">{category.description}</p>
 
-              <button className="view-resources-button">
-                View Resources →
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+              {/* Display list of uploaded files for this topic */}
+              <div className="file-list-container">
+                <div className="file-list">
+                  {filesCount > 0 ? (
+                    category.files.map(res => (
+                      <div key={res.id} className="file-item">
+                        <a href={res.fileUrl} target="_blank" rel="noreferrer" title={res.description}>
+                          📄 {res.title}
+                        </a>
+                        <a href={res.fileUrl} target="_blank" rel="noreferrer" className="download-btn">
+                          Download
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="file-item placeholder-text">
+                      <span>No resources available for this topic yet.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* --- Static "View Resources" button at the bottom --- */}
+              <div className="view-resources-button-wrapper">
+                  <button className="view-resources-btn" disabled={filesCount === 0}>
+                      View All ({filesCount}) →
+                  </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default Resources;

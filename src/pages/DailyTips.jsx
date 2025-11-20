@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DailyTips.css';
-// --- Firebase Imports ---
+
 import { db } from '../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-// --- Framer Motion Imports ---
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DailyTips = () => {
@@ -13,22 +13,21 @@ const DailyTips = () => {
   const [allTips, setAllTips] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- Default tips array ---
+
   const defaultTips = [
     { id: 'tip-1', title: 'Research the Company Thoroughly', description: '...', category: 'Preparation' },
     { id: 'tip-2', title: 'Practice the STAR Method', description: '...', category: 'Technique' },
-    // (Aapke baaki default tips yahan hain...)
+ 
     { id: 'tip-10', title: 'Follow Up After the Interview', description: '...', category: 'Follow-up' }
   ];
 
-  // --- Fetch tips from Firestore ---
+
   useEffect(() => {
     const fetchTips = async () => {
       setLoading(true);
       try {
         const tipsCollectionRef = collection(db, 'dailyTips');
-        // --- FIX: Ensure 'order' field name matches Firebase ---
-        // (Humne pehle discuss kiya tha, Firebase mein 'order' (chhota o) hona chahiye)
+       
         const q = query(tipsCollectionRef, orderBy('order', 'asc')); 
         const querySnapshot = await getDocs(q);
         const tipsData = querySnapshot.docs.map(doc => ({
@@ -36,25 +35,21 @@ const DailyTips = () => {
           id: doc.id
         }));
         
-        // Agar Firebase se tips mile toh woh use karo, varna default waale
         if (tipsData.length > 0) {
           setAllTips(tipsData);
         } else {
-          // Fallback agar Firebase khaali hai, lekin 'order' nahi hai
-          // Isliye defaultTips ko bhi set kar rahe hain
           console.warn("No tips found in Firebase, using default tips.");
           setAllTips(defaultTips);
         }
       } catch (err) {
         console.error("Error fetching tips: ", err);
-        // Agar fetch fail ho (jaise 'order' field na mile), toh default tips dikhao
         console.warn("Using default tips due to fetch error.");
         setAllTips(defaultTips);
       }
       setLoading(false);
     };
     fetchTips();
-  }, []); // Empty dependency array, runs once
+  }, []); 
 
   const handlePrevious = () => {
     setCurrentTip((prev) => (prev > 0 ? prev - 1 : allTips.length - 1));
@@ -70,12 +65,11 @@ const DailyTips = () => {
   };
   
   const truncateDescription = (text, maxLength) => {
-    if (!text) return ''; // Guard clause for undefined description
+    if (!text) return ''; 
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
   };
 
-  // --- Animation Variants ---
   const featuredTipVariants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -95,7 +89,6 @@ const DailyTips = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  // --- Loading State ---
   if (loading) {
     return (
       <div className="daily-tips">
@@ -107,8 +100,6 @@ const DailyTips = () => {
     );
   }
 
-  // --- No Tips Found State ---
-  // (Yeh tabhi dikhega jab fetch bhi fail ho aur defaultTips bhi na ho)
   if (!loading && allTips.length === 0) {
     return (
       <div className="daily-tips">
@@ -120,11 +111,8 @@ const DailyTips = () => {
     );
   }
   
-  // --- Render Main Component ---
-  // Added a check for allTips[currentTip] to prevent crash
   const currentTipData = allTips[currentTip];
   if (!currentTipData) {
-    // This can happen briefly if firebase data is bad
     return (
         <div className="daily-tips">
           <div className="loading-container">
@@ -143,11 +131,8 @@ const DailyTips = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      {/* --- FIX: Top waala progress bar humne YAHAN SE HATA DIYA ---
-        (Original .progress-container yahan tha)
-      */}
+      
 
-      {/* Header Section */}
       <div className="tips-header">
         <div className="header-content">
           <motion.h1 
@@ -171,8 +156,7 @@ const DailyTips = () => {
 
       <div className="tips-container">
         
-        {/* Featured Tip Section */}
-        <AnimatePresence mode="wait"> 
+=        <AnimatePresence mode="wait"> 
           <motion.div
             key={currentTip}
             className="featured-tip-wrapper"
@@ -183,7 +167,6 @@ const DailyTips = () => {
             transition={{ duration: 0.35 }}
           >
             <div className="featured-tip">
-              {/* Tip Badge */}
               <div className="tip-badge">
                 <motion.div 
                   className="badge-icon"
@@ -202,17 +185,14 @@ const DailyTips = () => {
                 </div>
               </div>
 
-              {/* Tip Content */}
               <h2 className="tip-heading">{currentTipData.title}</h2>
               
-              {/* --- FIX: Ab yeh divider progress bar hai ---
-                Iski width 'currentTip' state ke hisaab se update hogi
-              */}
+             
               <div 
                 className="tip-divider"
                 style={{
                   width: `${((currentTip + 1) / allTips.length) * 100}%`,
-                  transition: 'width 0.4s ease-out' // Taaki 'grow' effect smooth ho
+                  transition: 'width 0.4s ease-out'
                 }}
               ></div>
 
@@ -220,7 +200,6 @@ const DailyTips = () => {
                 {currentTipData.description}
               </p>
 
-              {/* Navigation Buttons */}
               <div className="tip-navigation">
                 <motion.button 
                   className="nav-button nav-previous" 

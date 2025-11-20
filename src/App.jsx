@@ -12,6 +12,7 @@ import DSA from './pages/DSA.jsx';
 import HR from './pages/HR.jsx';
 import MockInterview from './pages/MockInterview.jsx';
 import Resources from './pages/Resources.jsx';
+
 import SignIn from './pages/SignIn.jsx';
 import SignUp from './pages/SignUp.jsx';
 import './App.css';
@@ -66,6 +67,7 @@ function App() {
           <Route path="/hr" element={<HR />} />
           <Route path="/mock" element={<MockInterview />} />
           <Route path="/resources" element={<Resources />} />
+
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>

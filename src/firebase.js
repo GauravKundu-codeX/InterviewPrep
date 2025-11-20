@@ -1,12 +1,11 @@
-// src/firebase.js
+
 
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
-// PASTE YOUR CONFIG OBJECT FROM FIREBASE HERE
+
 const firebaseConfig = {
   apiKey: "AIzaSyDv5SmlAtsqp1FiqEHA6_HdOqSJMKZHnQ8",
   authDomain: "interviewprep-3079b.firebaseapp.com",
