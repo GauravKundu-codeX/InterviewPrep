@@ -250,7 +250,7 @@ const HR = () => {
               </div>
             )}
 
-            <div className="recording-section">
+            {/* <div className="recording-section">
               <h3 className="recording-title">🎤 Practice Your Answer</h3>
               <button
                 className={`practice-button record-button ${isRecording ? 'recording' : ''} ${recordingStatus === 'Done' ? 'success' : ''}`}
@@ -271,7 +271,7 @@ const HR = () => {
                   <p>{feedback}</p>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

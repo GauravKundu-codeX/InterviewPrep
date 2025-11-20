@@ -1,7 +1,7 @@
-/* Resources.css */
+
 .resources-page {
   min-height: 100vh;
-  background-color: #0b0f19; /* Dark background */
+  background-color: #0b0f19; 
   color: #ffffff;
   padding: 2rem;
   padding-top: 80px;
@@ -34,7 +34,7 @@
     color: #8892b0;
 }
 .error-message {
-    color: #ff6b6b; /* A soft red for errors */
+    color: #ff6b6b; 
 }
 
 
@@ -61,7 +61,7 @@
 }
 
 .resource-card:hover {
-  border-color: #3b82f6; /* Blue highlight on hover */
+  border-color: #3b82f6; 
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
@@ -79,7 +79,7 @@
 .card-icon {
   font-size: 3rem;
   margin-bottom: 1.5rem;
-  color: #60a5fa; /* Default icon color */
+  color: #60a5fa;
 }
 
 .resource-card h3 {
@@ -98,14 +98,13 @@
   z-index: 1;
 }
 
-/* "View Resources" Button Styling */
 .view-resources-placeholder {
-    margin-bottom: 1.5rem; /* Space below description */
-    margin-top: auto; /* Pushes the button to the bottom of the card */
+    margin-bottom: 1.5rem; 
+    margin-top: auto; 
 }
 
 .view-resources-btn {
-    background: #3b82f6; /* A strong blue for the main action */
+    background: #3b82f6; 
     border: none;
     color: #ffffff;
     padding: 0.8rem;
@@ -113,27 +112,26 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    width: 100%; /* Full width within the card */
+    width: 100%; 
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px; /* Space for the arrow icon */
+    gap: 8px; 
 }
 .view-resources-btn:hover {
-    background: #2563eb; /* Darker blue on hover */
-    transform: translateY(-1px); /* Slight lift */
+    background: #2563eb; 
+    transform: translateY(-1px); 
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
 
 
-/* File List Styles */
 .file-list {
-  margin-top: 1rem; /* Space from button */
-  max-height: 150px; /* Limit height for scroll */
+  margin-top: 1rem;
+  max-height: 150px; 
   overflow-y: auto;
   border-top: 1px solid #1f2937;
   padding-top: 1rem;
-  flex-grow: 1; /* Allow to fill remaining space */
+  flex-grow: 1; 
 }
 
 .file-item {
@@ -163,7 +161,6 @@
   font-style: italic;
 }
 
-/* Custom Scrollbar for file list */
 .file-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -183,9 +180,9 @@
   }
   .resources-grid {
     grid-template-columns: 1fr;
-    padding: 0 0.5rem; /* Less padding on small screens */
+    padding: 0 0.5rem;
   }
   .resource-card {
-      min-height: auto; /* Allow height to adjust on mobile */
+      min-height: auto; 
   }
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './Resources.css';
-// --- Firebase Imports ---
 import { db } from '../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
@@ -9,20 +8,16 @@ const Resources = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch resources directly from Firestore Client SDK
   const fetchResources = async () => {
     setLoading(true);
     setError('');
     try {
-      // 1. Fetch all primary category documents
       const categoriesQuery = query(collection(db, 'categories'), orderBy('order'));
       const categoriesSnapshot = await getDocs(categoriesQuery);
       
-      // 2. Map over categories and fetch their nested resources
       const categoriesWithFiles = categoriesSnapshot.docs.map(async (categoryDoc) => {
         const categoryData = categoryDoc.data();
         
-        // --- FIX: Changed 'files' to 'resources' ---
         const filesQuery = query(collection(db, 'categories', categoryDoc.id, 'resources'), orderBy('title', 'asc'));
         const filesSnapshot = await getDocs(filesQuery);
         
@@ -34,11 +29,10 @@ const Resources = () => {
         return {
           ...categoryData,
           id: categoryDoc.id,
-          files: filesData, // Note: State variable is still called 'files' internally
+          files: filesData, 
         };
       });
 
-      // 3. Wait for all nested fetches to complete
       const allData = await Promise.all(categoriesWithFiles);
       setResources(allData); 
 
@@ -76,7 +70,6 @@ const Resources = () => {
               <h3>{category.title}</h3> 
               <p className="card-desc">{category.description}</p>
 
-              {/* Display list of uploaded files for this topic */}
               <div className="file-list-container">
                 <div className="file-list">
                   {filesCount > 0 ? (
@@ -98,7 +91,6 @@ const Resources = () => {
                 </div>
               </div>
 
-              {/* --- Static "View Resources" button at the bottom --- */}
               <div className="view-resources-button-wrapper">
                   <button className="view-resources-btn" disabled={filesCount === 0}>
                       View All ({filesCount}) →

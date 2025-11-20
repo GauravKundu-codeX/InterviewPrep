@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
-// --- Firebase Imports ---
-import { auth, db } from '../firebase'; // Import auth and db
+import { auth, db } from '../firebase'; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore"; 
 
@@ -16,7 +15,6 @@ const SignUp = () => {
     password: '',
     confirmPassword: ''
   });
-  // --- State for Firebase errors ---
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -26,10 +24,9 @@ const SignUp = () => {
     });
   };
 
-  // --- Updated handleSubmit for Firebase ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    setError(''); 
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
@@ -48,15 +45,14 @@ const SignUp = () => {
       const user = userCredential.user;
       console.log('User created in Auth:', user);
 
-      // 2. Save additional user data to Firestore
-      // We create a new document in the "users" collection with the user's UID
+      
       await setDoc(doc(db, "users", user.uid), {
         username: formData.username,
         email: formData.email,
         dob: formData.dob,
         phone: formData.phone,
         uid: user.uid
-        // We don't save the password here, Firebase handles that securely
+       
       });
 
       console.log('User data saved to Firestore');
